@@ -2,8 +2,10 @@
 #include<stdio.h>
 #include<string.h>
 
+//testing
+
 /*Constants */
-const int MAX = 10; 
+const int MAX = 10;
 #define TRUE 1;
 #define FALSE 0;
 
@@ -105,7 +107,7 @@ int main() {
     printf("%s", toStringList(list));
     deleteActivity(&list, act2);
     printf("%s", toStringList(list));
-    
+
 }
 
 /*Save the activity in the list array */
@@ -127,7 +129,7 @@ int updateActivity(struct List *list, struct Activity actUp){
     int position;
     position = findId(list, actUp);
     if(position != -1){
-       list -> activities[position] = actUp; 
+       list -> activities[position] = actUp;
        flag = TRUE;
     }else{
         printf("Update could not be done\n");
@@ -144,7 +146,7 @@ int deleteActivity(struct List *list, struct Activity act){
     if(position != -1){
       for(i=position; i<list->index; i++){
         list->activities[i] = list->activities[i+1];
-        } 
+        }
         list -> index--;
         flag = TRUE;
     }else{

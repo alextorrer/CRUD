@@ -2,8 +2,6 @@
 #include<stdio.h>
 #include<string.h>
 
-//testing
-
 /*Constants */
 const int MAX = 10;
 #define TRUE 1;

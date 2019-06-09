@@ -101,8 +101,10 @@ int main() {
     createActivity(&list, act9);
     createActivity(&list, act10);
     printf("%s", toStringList(list));
+    free(toStringList(list));
     updateActivity(&list, actUp);
     printf("%s", toStringList(list));
+    free(toStringList(list));
     deleteActivity(&list, act2);
     printf("%s", toStringList(list));
 
@@ -169,7 +171,7 @@ int findId(struct List *list, struct Activity act){
 
 /*Returns the print format of a date */
 char* toStringDate(struct Date date){
-    char output[20];
+    char *output = malloc(20);
     char tempDay[3];
     char tempMonth[3];
     char tempYear[5];
@@ -187,7 +189,7 @@ char* toStringDate(struct Date date){
 
 /*Returns the print format of an activity */
 char* toStringActivity(struct Activity act){
-    char output[250];
+    char *output = malloc(250);
     char tempId[10] = "ID: ";
     char tempIdConv[5];
     char tempTitle[25] = "Title: ";
@@ -222,7 +224,7 @@ char* toStringActivity(struct Activity act){
 
 /*Returns the print format of the list */
 char* toStringList(struct List list){
-    char output[2500];
+    char *output = malloc(2500);
     int i;
     for(i=0; i<list.index; i++){
         strcat(output, toStringActivity(list.activities[i]));

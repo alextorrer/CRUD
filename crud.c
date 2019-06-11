@@ -3,9 +3,9 @@
 #include<string.h>
 
 /*Constants */
-const int MAX = 10;
-#define TRUE 1;
-#define FALSE 0;
+const int MAX = 100;
+#define TRUE 1
+#define FALSE 0
 
 /*Structures*/
 struct Date{
@@ -80,7 +80,7 @@ int main() {
     .start.day = 19, .start.month = 06, .start.year = 2019,
     .finish.day = 20, .finish.month = 06, .finish.year = 2019,
     };
-    struct Activity actUp = {.id = 1001, .title = "Activity Up", .description = "Some Description", .priority = "Low",
+    struct Activity actUp = {.id = 1001, .title = "Activity Up", .description = "Some Description updated", .priority = "Medium",
     .start.day = 16, .start.month = 06, .start.year = 2019,
     .finish.day = 23, .finish.month = 06, .finish.year = 2019,
     };
@@ -100,11 +100,10 @@ int main() {
     createActivity(&list, act8);
     createActivity(&list, act9);
     createActivity(&list, act10);
+    //printf("PRINT");
     printf("%s", toStringList(list));
-    free(toStringList(list));
     updateActivity(&list, actUp);
     printf("%s", toStringList(list));
-    free(toStringList(list));
     deleteActivity(&list, act2);
     printf("%s", toStringList(list));
 
@@ -117,29 +116,27 @@ int createActivity(struct List *list, struct Activity act){
         list -> activities[list->index] = act;
         flag = TRUE;
         list -> index++;
-    }else{
-    printf("No more space in the array\n");
     }
     return flag;
 }
-/*Update an activity  */
+/*Update an activity
+Activity to update -> act1, ID= 1001*/
 int updateActivity(struct List *list, struct Activity actUp){
-    printf("\n\nUPDATE ACTIVITY\n");
+    printf("\n\nUPDATE ACTIVITY 1001\n");
     int flag = FALSE;
     int position;
     position = findId(list, actUp);
     if(position != -1){
        list -> activities[position] = actUp;
        flag = TRUE;
-    }else{
-        printf("Update could not be done\n");
     }
     return flag;
 }
 
-/*Delete an activity */
+/*Delete an activity
+Delete act2, ID= 1002 */
 int deleteActivity(struct List *list, struct Activity act){
-    printf("\n\nDELETE ACTIVITY\n");
+    printf("\n\nDELETE ACTIVITY 1002\n");
     int flag = FALSE;
     int i, position;
     position = findId(list, act);
@@ -149,8 +146,6 @@ int deleteActivity(struct List *list, struct Activity act){
         }
         list -> index--;
         flag = TRUE;
-    }else{
-        printf("Delete could not be done\n");
     }
     return flag;
 }
@@ -163,60 +158,51 @@ int findId(struct List *list, struct Activity act){
             pos = i;
         }
     }
-    if(pos == -1){
-        printf("ID was not found\n");
-    }
     return pos;
 }
 
 /*Returns the print format of a date */
 char* toStringDate(struct Date date){
-    char *output = malloc(20);
-    char tempDay[3];
-    char tempMonth[3];
-    char tempYear[5];
+    char output[100];
+    char tempInt[10];
 
-    sprintf(tempDay, "%d/", date.day);
-    sprintf(tempMonth, "%d/", date.month);
-    sprintf(tempYear, "%d", date.year);
-    strcat(output, tempDay);
-    strcat(output, tempMonth);
-    strcat(output, tempYear);
-    strcat(output, "\n");
+    strcpy(output, "");
+    sprintf(tempInt, "%d", date.day);
+    strcat(output, tempInt);
+    strcat(output, "/");
+    sprintf(tempInt, "%d", date.month);
+    strcat(output, tempInt);
+    strcat(output, "/");
+    sprintf(tempInt, "%d", date.year);
+    strcat(output, tempInt);
 
     return output;
 }
 
 /*Returns the print format of an activity */
 char* toStringActivity(struct Activity act){
-    char *output = malloc(250);
-    char tempId[10] = "ID: ";
-    char tempIdConv[5];
-    char tempTitle[25] = "Title: ";
-    char tempDescription[100] = "Description: ";
-    char tempPriority[25] = "Priority: ";
-    char tempStart[30] = "Start Date: ";
-    char tempFinish[30] = "Finish Date: ";
-
-    sprintf(tempIdConv, "%d", act.id);
-    strcat(tempId, tempIdConv);
-    strcat(tempTitle, act.title);
-    strcat(tempDescription, act.description);
-    strcat(tempPriority, act.priority);
-    strcat(tempStart, toStringDate(act.start));
-    strcat(tempFinish, toStringDate(act.finish));
-
-    strcat(tempId, "\n");
-    strcat(tempTitle, "\n");
-    strcat(tempDescription, "\n");
-    strcat(tempPriority, "\n");
-
-    strcat(output, tempTitle);
+    char output[1000];
+    char tempId[10];
+    strcpy(output, "");
+    strcpy(output, "\n");
+    strcat(output, "Title: ");
+    strcat(output, act.title);
+    strcat(output, "\n");
+    sprintf(tempId, "%d", act.id);
+    strcat(output, "ID: ");
     strcat(output, tempId);
-    strcat(output, tempDescription);
-    strcat(output, tempPriority);
-    strcat(output, tempStart);
-    strcat(output, tempFinish);
+    strcat(output, "\n");
+    strcat(output, "Description: ");
+    strcat(output, act.description);
+    strcat(output, "\n");
+    strcat(output, "Priority: ");
+    strcat(output, act.priority);
+    strcat(output, "\n");
+    strcat(output, "Start Date: ");
+    strcat(output, toStringDate(act.start));
+    strcat(output, "\n");
+    strcat(output, "Finish Date: ");
+    strcat(output, toStringDate(act.finish));
     strcat(output, "\n");
 
     return output;
@@ -224,10 +210,11 @@ char* toStringActivity(struct Activity act){
 
 /*Returns the print format of the list */
 char* toStringList(struct List list){
-    char *output = malloc(2500);
+    char output[10000];
+    strcpy(output, "");
     int i;
     for(i=0; i<list.index; i++){
         strcat(output, toStringActivity(list.activities[i]));
-    }
+        }
     return output;
 }

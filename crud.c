@@ -122,7 +122,7 @@ int createActivity(struct List *list, struct Activity act){
 /*Update an activity
 Activity to update -> act1, ID= 1001*/
 int updateActivity(struct List *list, struct Activity actUp){
-    printf("\n\nUPDATE ACTIVITY 1001\n");
+    printf("\n\n-----UPDATE ACTIVITY 1001-----\n");
     int flag = FALSE;
     int position;
     position = findId(list, actUp);
@@ -136,7 +136,7 @@ int updateActivity(struct List *list, struct Activity actUp){
 /*Delete an activity
 Delete act2, ID= 1002 */
 int deleteActivity(struct List *list, struct Activity act){
-    printf("\n\nDELETE ACTIVITY 1002\n");
+    printf("\n\n-----DELETE ACTIVITY 1002-----\n");
     int flag = FALSE;
     int i, position;
     position = findId(list, act);

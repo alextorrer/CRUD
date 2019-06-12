@@ -29,13 +29,13 @@ struct List{
 };
 
 /*Functions prototypes */
-int createActivity(struct List *list, struct Activity act);
-int updateActivity(struct List *list, struct Activity actUp);
-int deleteActivity(struct List *list, struct Activity act);
-int findId(struct List *list, struct Activity act);
-char* toStringDate(struct Date date);
-char* toStringActivity(struct Activity act);
-char* toStringList(struct List list);
+int createActivity(struct List *list, struct Activity *act);
+int updateActivity(struct List *list, struct Activity *actUp);
+int deleteActivity(struct List *list, struct Activity *act);
+int findId(struct List *list, struct Activity *act);
+char* toStringDate(struct Date *date);
+char* toStringActivity(struct Activity *act);
+char* toStringList(struct List *list);
 
 int main() {
 
@@ -90,30 +90,30 @@ int main() {
     list.index = 0;
 
     /*Calling functions */
-    createActivity(&list, act1);
-    createActivity(&list, act2);
-    createActivity(&list, act3);
-    createActivity(&list, act4);
-    createActivity(&list, act5);
-    createActivity(&list, act6);
-    createActivity(&list, act7);
-    createActivity(&list, act8);
-    createActivity(&list, act9);
-    createActivity(&list, act10);
+    createActivity(&list, &act1);
+    createActivity(&list, &act2);
+    createActivity(&list, &act3);
+    createActivity(&list, &act4);
+    createActivity(&list, &act5);
+    createActivity(&list, &act6);
+    createActivity(&list, &act7);
+    createActivity(&list, &act8);
+    createActivity(&list, &act9);
+    createActivity(&list, &act10);
     //printf("PRINT");
-    printf("%s", toStringList(list));
-    updateActivity(&list, actUp);
-    printf("%s", toStringList(list));
-    deleteActivity(&list, act2);
-    printf("%s", toStringList(list));
+    printf("%s", toStringList(&list));
+    updateActivity(&list, &actUp);
+    printf("%s", toStringList(&list));
+    deleteActivity(&list, &act2);
+    printf("%s", toStringList(&list));
 
 }
 
 /*Save the activity in the list array */
-int createActivity(struct List *list, struct Activity act){
+int createActivity(struct List *list, struct Activity *act){
     int flag = FALSE;
     if(list -> index < MAX){
-        list -> activities[list->index] = act;
+        list -> activities[list->index] = *act;
         flag = TRUE;
         list -> index++;
     }
@@ -121,13 +121,13 @@ int createActivity(struct List *list, struct Activity act){
 }
 /*Update an activity
 Activity to update -> act1, ID= 1001*/
-int updateActivity(struct List *list, struct Activity actUp){
+int updateActivity(struct List *list, struct Activity *actUp){
     printf("\n\n-----UPDATE ACTIVITY 1001-----\n");
     int flag = FALSE;
     int position;
     position = findId(list, actUp);
     if(position != -1){
-       list -> activities[position] = actUp;
+       list -> activities[position] = *actUp;
        flag = TRUE;
     }
     return flag;
@@ -135,7 +135,7 @@ int updateActivity(struct List *list, struct Activity actUp){
 
 /*Delete an activity
 Delete act2, ID= 1002 */
-int deleteActivity(struct List *list, struct Activity act){
+int deleteActivity(struct List *list, struct Activity *act){
     printf("\n\n-----DELETE ACTIVITY 1002-----\n");
     int flag = FALSE;
     int i, position;
@@ -151,10 +151,10 @@ int deleteActivity(struct List *list, struct Activity act){
 }
 
 /*Searchs an activity's ID and return its position */
-int findId(struct List *list, struct Activity act){
+int findId(struct List *list, struct Activity *act){
     int pos = -1, i;
     for(i=0;i<list->index;i++){
-        if(act.id == list->activities[i].id){
+        if(act->id == list->activities[i].id){
             pos = i;
         }
     }
@@ -162,59 +162,59 @@ int findId(struct List *list, struct Activity act){
 }
 
 /*Returns the print format of a date */
-char* toStringDate(struct Date date){
+char* toStringDate(struct Date *date){
     char output[100];
     char tempInt[10];
 
     strcpy(output, "");
-    sprintf(tempInt, "%d", date.day);
+    sprintf(tempInt, "%d", date->day);
     strcat(output, tempInt);
     strcat(output, "/");
-    sprintf(tempInt, "%d", date.month);
+    sprintf(tempInt, "%d", date->month);
     strcat(output, tempInt);
     strcat(output, "/");
-    sprintf(tempInt, "%d", date.year);
+    sprintf(tempInt, "%d", date->year);
     strcat(output, tempInt);
 
     return output;
 }
 
 /*Returns the print format of an activity */
-char* toStringActivity(struct Activity act){
+char* toStringActivity(struct Activity *act){
     char output[1000];
     char tempId[10];
     strcpy(output, "");
     strcpy(output, "\n");
     strcat(output, "Title: ");
-    strcat(output, act.title);
+    strcat(output, act->title);
     strcat(output, "\n");
-    sprintf(tempId, "%d", act.id);
+    sprintf(tempId, "%d", act->id);
     strcat(output, "ID: ");
     strcat(output, tempId);
     strcat(output, "\n");
     strcat(output, "Description: ");
-    strcat(output, act.description);
+    strcat(output, act->description);
     strcat(output, "\n");
     strcat(output, "Priority: ");
-    strcat(output, act.priority);
+    strcat(output, act->priority);
     strcat(output, "\n");
     strcat(output, "Start Date: ");
-    strcat(output, toStringDate(act.start));
+    strcat(output, toStringDate(&(act->start)));
     strcat(output, "\n");
     strcat(output, "Finish Date: ");
-    strcat(output, toStringDate(act.finish));
+    strcat(output, toStringDate(&(act->finish)));
     strcat(output, "\n");
 
     return output;
-}
+
 
 /*Returns the print format of the list */
-char* toStringList(struct List list){
+char* toStringList(struct List *list){
     char output[10000];
     strcpy(output, "");
     int i;
-    for(i=0; i<list.index; i++){
-        strcat(output, toStringActivity(list.activities[i]));
+    for(i=0; i<list->index; i++){
+        strcat(output, toStringActivity(&(list->activities[i])));
         }
     return output;
 }

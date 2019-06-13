@@ -206,7 +206,7 @@ char* toStringActivity(struct Activity *act){
     strcat(output, "\n");
 
     return output;
-
+}
 
 /*Returns the print format of the list */
 char* toStringList(struct List *list){

@@ -16,16 +16,16 @@ struct Date{
 
 struct Activity{
     int id;
-    char title[25];
-    char description[100];
-    char priority[10];
+    char *title;
+    char *description;
+    char *priority;
     struct Date start;
     struct Date finish;
 };
 
 struct List{
     int index;
-    struct Activity activities[10];
+    struct Activity *activities[10]; //Make a pointer-array
 };
 
 /*Functions prototypes */
@@ -36,76 +36,71 @@ int findId(struct List *list, struct Activity *act);
 char* toStringDate(struct Date *date);
 char* toStringActivity(struct Activity *act);
 char* toStringList(struct List *list);
+void fillData(struct List *list, struct Activity *act);
 
 int main() {
 
-    /*Activities block */
-    struct Activity act1 = {.id = 1001, .title = "Activity 1", .description = "Some Description", .priority = "Low",
-    .start.day = 06, .start.month = 06, .start.year = 2019,
-    .finish.day = 10, .finish.month = 06, .finish.year = 2019,
-    };
-    struct Activity act2 = {.id = 1002, .title = "Activity 2", .description = "Some Description", .priority = "Medium",
-    .start.day = 07, .start.month = 06, .start.year = 2019,
-    .finish.day = 11, .finish.month = 06, .finish.year = 2019,
-    };
-    struct Activity act3 = {.id = 1003, .title = "Activity 3", .description = "Some Description", .priority = "High",
-    .start.day = 8, .start.month = 06, .start.year = 2019,
-    .finish.day = 12, .finish.month = 06, .finish.year = 2019,
-    };
-    struct Activity act4 = {.id = 1004, .title = "Activity 4", .description = "Some Description", .priority = "Low",
-    .start.day = 16, .start.month = 06, .start.year = 2019,
-    .finish.day = 21, .finish.month = 06, .finish.year = 2019,
-    };
-    struct Activity act5 = {.id = 1005, .title = "Activity 5", .description = "Some Description", .priority = "Medium",
-    .start.day = 9, .start.month = 06, .start.year = 2019,
-    .finish.day = 15, .finish.month = 06, .finish.year = 2019,
-    };
-    struct Activity act6 = {.id = 1006, .title = "Activity 6", .description = "Some Description", .priority = "Low",
-    .start.day = 21, .start.month = 06, .start.year = 2019,
-    .finish.day = 10, .finish.month = 07, .finish.year = 2019,
-    };
-    struct Activity act7 = {.id = 1007, .title = "Activity 7", .description = "Some Description", .priority = "High",
-    .start.day = 7, .start.month = 06, .start.year = 2019,
-    .finish.day = 8, .finish.month = 06, .finish.year = 2019,
-    };
-    struct Activity act8 = {.id = 1008, .title = "Activity 8", .description = "Some Description", .priority = "High",
-    .start.day = 14, .start.month = 06, .start.year = 2019,
-    .finish.day = 30, .finish.month = 06, .finish.year = 2019,
-    };
-    struct Activity act9 = {.id = 1009, .title = "Activity 9", .description = "Some Description", .priority = "Medium",
-    .start.day = 5, .start.month = 06, .start.year = 2019,
-    .finish.day = 10, .finish.month = 06, .finish.year = 2019,
-    };
-    struct Activity act10 = {.id = 1010, .title = "Activity 10", .description = "Some Description", .priority = "High",
-    .start.day = 19, .start.month = 06, .start.year = 2019,
-    .finish.day = 20, .finish.month = 06, .finish.year = 2019,
-    };
-    struct Activity actUp = {.id = 1001, .title = "Activity Up", .description = "Some Description updated", .priority = "Medium",
-    .start.day = 16, .start.month = 06, .start.year = 2019,
-    .finish.day = 23, .finish.month = 06, .finish.year = 2019,
-    };
+	//Reserve memory with malloc
+	struct Activity *act1 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *act2 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *act3 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *act4 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *act5 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *act6 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *act7 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *act8 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *act9 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *act10 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *actUp = (struct Activity*)malloc(sizeof(struct Activity));
 
     /*Initialize list */
     struct List list;
     list.index = 0;
 
     /*Calling functions */
-    createActivity(&list, &act1);
-    createActivity(&list, &act2);
-    createActivity(&list, &act3);
-    createActivity(&list, &act4);
-    createActivity(&list, &act5);
-    createActivity(&list, &act6);
-    createActivity(&list, &act7);
-    createActivity(&list, &act8);
-    createActivity(&list, &act9);
-    createActivity(&list, &act10);
-    //printf("PRINT");
+    fillData(&list, act1);
+    createActivity(&list, act1);
+    fillData(&list, act2);
+    createActivity(&list, act2);
+    fillData(&list, act3);
+    createActivity(&list, act3);
+    fillData(&list, act4);
+    createActivity(&list, act4);
+    fillData(&list, act5);
+    createActivity(&list, act5);
+    fillData(&list, act6);
+    createActivity(&list, act6);
+    fillData(&list, act7);
+    createActivity(&list, act7);
+    fillData(&list, act8);
+    createActivity(&list, act8);
+    fillData(&list, act9);
+    createActivity(&list, act9);
+    fillData(&list, act10);
+    createActivity(&list, act10);
+
+    //Fill data of to-update activity
+    actUp->id = 1001; actUp->title = "Activity Updated"; actUp->description = "Some Description updated"; actUp->priority = "Low";
+    actUp->start.day = 16; actUp->start.month = 6; actUp->start.year = 2019;
+	actUp->finish.day = 19; actUp->finish.month = 6; actUp->finish.year = 2019;
+
     printf("%s", toStringList(&list));
-    updateActivity(&list, &actUp);
+    updateActivity(&list, actUp);
     printf("%s", toStringList(&list));
-    deleteActivity(&list, &act2);
+    deleteActivity(&list, act2);
     printf("%s", toStringList(&list));
+
+    free(act1);
+    free(act2);
+    free(act3);
+    free(act4);
+    free(act5);
+    free(act6);
+    free(act7);
+    free(act8);
+    free(act9);
+    free(act10);
+    free(actUp);
 
 }
 
@@ -113,7 +108,7 @@ int main() {
 int createActivity(struct List *list, struct Activity *act){
     int flag = FALSE;
     if(list -> index < MAX){
-        list -> activities[list->index] = *act;
+        list -> activities[list->index] = act;
         flag = TRUE;
         list -> index++;
     }
@@ -127,7 +122,7 @@ int updateActivity(struct List *list, struct Activity *actUp){
     int position;
     position = findId(list, actUp);
     if(position != -1){
-       list -> activities[position] = *actUp;
+       list -> activities[position] = actUp;
        flag = TRUE;
     }
     return flag;
@@ -154,7 +149,7 @@ int deleteActivity(struct List *list, struct Activity *act){
 int findId(struct List *list, struct Activity *act){
     int pos = -1, i;
     for(i=0;i<list->index;i++){
-        if(act->id == list->activities[i].id){
+        if(act->id == list->activities[i]->id){
             pos = i;
         }
     }
@@ -214,7 +209,21 @@ char* toStringList(struct List *list){
     strcpy(output, "");
     int i;
     for(i=0; i<list->index; i++){
-        strcat(output, toStringActivity(&(list->activities[i])));
+        strcat(output, toStringActivity(list->activities[i]));
         }
     return output;
+}
+
+//Fill the activitie's information
+void fillData(struct List *list, struct Activity *act) {
+	char temp_index[3];
+	strcpy(temp_index, "");
+	act->id = 1001 +(list->index);
+	sprintf(temp_index, "%d", list->index);
+	act->title = "Activity X";
+	//strcat(act->title, temp_index);
+	act->description = "Some Description";
+	act->priority = "High";
+	act->start.day = 15; act->start.month = 6; act->start.year = 2019;
+	act->finish.day = 17; act->finish.month = 6; act->finish.year = 2019;
 }

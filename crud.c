@@ -35,8 +35,11 @@ int deleteActivity(struct List *list, struct Activity *act);
 int findId(struct List *list, struct Activity *act);
 char* toStringDate(struct Date *date);
 char* toStringActivity(struct Activity *act);
-char* toStringList(struct List *list);
+char* toStringList(struct List *list, struct Activity *actDate[]);
 void fillData(struct List *list, struct Activity *act);
+void dateSort(struct Activity *actDate[], struct List *list);
+int getDays(struct Activity *act);
+void copyArray(struct List *list, struct Activity *actDate[]);
 
 int main() {
 
@@ -52,10 +55,15 @@ int main() {
 	struct Activity *act9 = (struct Activity*)malloc(sizeof(struct Activity));
 	struct Activity *act10 = (struct Activity*)malloc(sizeof(struct Activity));
 	struct Activity *actUp = (struct Activity*)malloc(sizeof(struct Activity));
+	//Fill data of to-update activity
+    actUp->id = 1001; actUp->title = "Activity Updated"; actUp->description = "Some Description updated"; actUp->priority = "Low";
+    actUp->start.day = 10; actUp->start.month = 6; actUp->start.year = 2019;
+	actUp->finish.day = 9; actUp->finish.month = 6; actUp->finish.year =2019;
 
-    /*Initialize list */
+    /*Initialize variables */
     struct List list;
     list.index = 0;
+    struct Activity *actDate[10]; //New activity-pointer-array for dateSort
 
     /*Calling functions */
     fillData(&list, act1);
@@ -79,16 +87,19 @@ int main() {
     fillData(&list, act10);
     createActivity(&list, act10);
 
-    //Fill data of to-update activity
-    actUp->id = 1001; actUp->title = "Activity Updated"; actUp->description = "Some Description updated"; actUp->priority = "Low";
-    actUp->start.day = 16; actUp->start.month = 6; actUp->start.year = 2019;
-	actUp->finish.day = 19; actUp->finish.month = 6; actUp->finish.year = 2019;
+	copyArray(&list,actDate);
+	dateSort(actDate, &list);
+    printf("%s", toStringList(&list, actDate));
 
-    printf("%s", toStringList(&list));
     updateActivity(&list, actUp);
-    printf("%s", toStringList(&list));
+    copyArray(&list,actDate);
+    dateSort(actDate, &list);
+    printf("%s", toStringList(&list, actDate));
+
     deleteActivity(&list, act2);
-    printf("%s", toStringList(&list));
+    copyArray(&list,actDate);
+    dateSort(actDate, &list);
+    printf("%s", toStringList(&list, actDate));
 
     free(act1);
     free(act2);
@@ -204,12 +215,12 @@ char* toStringActivity(struct Activity *act){
 }
 
 /*Returns the print format of the list */
-char* toStringList(struct List *list){
+char* toStringList(struct List *list, struct Activity *actDate[]){
     char output[10000];
     strcpy(output, "");
     int i;
     for(i=0; i<list->index; i++){
-        strcat(output, toStringActivity(list->activities[i]));
+        strcat(output, toStringActivity(actDate[i]));
         }
     return output;
 }
@@ -221,9 +232,62 @@ void fillData(struct List *list, struct Activity *act) {
 	act->id = 1001 +(list->index);
 	sprintf(temp_index, "%d", list->index);
 	act->title = "Activity X";
-	//strcat(act->title, temp_index);
 	act->description = "Some Description";
 	act->priority = "High";
-	act->start.day = 15; act->start.month = 6; act->start.year = 2019;
-	act->finish.day = 17; act->finish.month = 6; act->finish.year = 2019;
+	act->start.day = 15 + (list->index); act->start.month = 6; act->start.year = 2019;
+	act->finish.day = 17 + (list->index); act->finish.month = 6; act->finish.year = 2019;
+}
+
+/*Sort the activities by start date in ascending order*/
+void dateSort(struct Activity *actDate[], struct List *list){
+	int i, j , days_x, days_y;
+	struct Activity *temp;
+
+	for(i=0;i<(list->index)-1;i++){
+		for(j=0;j<(list->index)-1;j++){
+			days_x = 0;
+			days_y = 0;
+			days_x = getDays((actDate[j]));
+			days_y = getDays((actDate[j+1]));
+			if( days_x >= days_y ){
+				temp = (actDate[j]);
+				(actDate[j]) = (actDate[j+1]);
+				(actDate[j+1]) = temp;
+			}
+		}
+	}
+}
+
+
+/* Get the number of days contained in the start date */
+int getDays(struct Activity *act){
+	int days;
+	if(((act->start.month)%2==0) && ((act->start.month) < 9)){ //if its February, April, June or August
+		days = (((act->start.year)-1) * (365)) + (((act->start.month)-1) * (31)) + (act->start.day);
+
+	}else if(((act->start.month)%2==0) && ((act->start.month) > 9)){ //if its October or December
+		days = (((act->start.year)-1) * (365)) + (((act->start.month)-1) * (30)) + (act->start.day);
+
+	}else if(((act->start.month)%2!=0) && ((act->start.month) == 1)){ // if its January
+		days = (((act->start.year)-1) * (365)) + (act->start.day);
+
+	}else if(((act->start.month)%2!=0) && ((act->start.month) == 3)){ // if its March
+		days = (((act->start.year)-1) * (365)) + (((act->start.month)-1) * (28)) + (act->start.day);
+
+	}else if(((act->start.month)%2!=0) && ((act->start.month) < 8)){ //if its May or July
+		days = (((act->start.year)-1) * (365)) + (((act->start.month)-1) * (30)) + (act->start.day);
+
+	}else if(((act->start.month)%2!=0) && ((act->start.month) > 8)){ //if its September or November
+		days = (((act->start.year)-1) * (365)) + (((act->start.month)-1) * (31)) + (act->start.day);
+	}
+
+	return days;
+
+}
+//Copy the list structure activity-pointer-array to a new activity-pointer-array
+void copyArray(struct List *list, struct Activity *actDate[]){
+	int i;
+	for(i=0; i<(list->index); i++){
+		actDate[i] =(list->activities[i]);
+	}
 }

@@ -25,21 +25,28 @@ struct Activity{
 
 struct List{
     int index;
-    struct Activity *activities[10]; //Make a pointer-array
+    struct Node *head;
+	struct Node *tail;
+};
+
+struct Node{
+	struct Activity *activity;
+	struct Node *next;
 };
 
 /*Functions prototypes */
-int createActivity(struct List *list, struct Activity *act);
+int createNode(struct List *list, struct Activity *act);
 int updateActivity(struct List *list, struct Activity *actUp);
 int deleteActivity(struct List *list, struct Activity *act);
-int findId(struct List *list, struct Activity *act);
+struct Node* findId(struct List *list, struct Activity *act);
 char* toStringDate(struct Date *date);
 char* toStringActivity(struct Activity *act);
-char* toStringList(struct List *list, struct Activity *actDate[]);
+char* toStringList(struct List *list, struct Node *actDate[]);
 void fillData(struct List *list, struct Activity *act);
-void dateSort(struct Activity *actDate[], struct List *list);
+void dateSort(struct Node *actDate[], struct List *list);
 int getDays(struct Activity *act);
-void copyArray(struct List *list, struct Activity *actDate[]);
+void copyArray(struct List *list, struct Node *actDate[]);
+void freeNodeByAct(struct List *list, struct Activity *act);
 
 int main() {
 
@@ -60,32 +67,34 @@ int main() {
     actUp->start.day = 10; actUp->start.month = 6; actUp->start.year = 2019;
 	actUp->finish.day = 9; actUp->finish.month = 6; actUp->finish.year =2019;
 
-    /*Initialize variables */
+    //Initialize variables
     struct List list;
     list.index = 0;
-    struct Activity *actDate[10]; //New activity-pointer-array for dateSort
+    list.head = NULL;
+    list.tail = NULL;
+    struct Node *actDate[10]; //New Node-pointer-array for dateSort
 
     /*Calling functions */
     fillData(&list, act1);
-    createActivity(&list, act1);
+    createNode(&list, act1);
     fillData(&list, act2);
-    createActivity(&list, act2);
+    createNode(&list, act2);
     fillData(&list, act3);
-    createActivity(&list, act3);
+    createNode(&list, act3);
     fillData(&list, act4);
-    createActivity(&list, act4);
+    createNode(&list, act4);
     fillData(&list, act5);
-    createActivity(&list, act5);
+    createNode(&list, act5);
     fillData(&list, act6);
-    createActivity(&list, act6);
+    createNode(&list, act6);
     fillData(&list, act7);
-    createActivity(&list, act7);
+    createNode(&list, act7);
     fillData(&list, act8);
-    createActivity(&list, act8);
+    createNode(&list, act8);
     fillData(&list, act9);
-    createActivity(&list, act9);
+    createNode(&list, act9);
     fillData(&list, act10);
-    createActivity(&list, act10);
+    createNode(&list, act10);
 
 	copyArray(&list,actDate);
 	dateSort(actDate, &list);
@@ -101,28 +110,39 @@ int main() {
     dateSort(actDate, &list);
     printf("%s", toStringList(&list, actDate));
 
-    free(act1);
-    free(act2);
-    free(act3);
-    free(act4);
-    free(act5);
-    free(act6);
-    free(act7);
-    free(act8);
-    free(act9);
-    free(act10);
-    free(actUp);
-
+	freeNodeByAct(&list, act1);
+	freeNodeByAct(&list, act2);
+	freeNodeByAct(&list, act3);
+	freeNodeByAct(&list, act4);
+	freeNodeByAct(&list, act5);
+	freeNodeByAct(&list, act6);
+	freeNodeByAct(&list, act7);
+	freeNodeByAct(&list, act8);
+	freeNodeByAct(&list, act9);
+	freeNodeByAct(&list, act10);
+	freeNodeByAct(&list, actUp);
 }
 
-/*Save the activity in the list array */
-int createActivity(struct List *list, struct Activity *act){
+/*Save the activity at the end of the linked list */
+int createNode(struct List *list, struct Activity *act){
     int flag = FALSE;
-    if(list -> index < MAX){
-        list -> activities[list->index] = act;
-        flag = TRUE;
-        list -> index++;
-    }
+    struct Node *newNode;
+    newNode = (struct Node*)malloc(sizeof(struct Node));
+    if((list->index == 0)&&(newNode!= NULL)){ //if the linked list its empty
+    	newNode->activity = act;
+    	newNode->next = NULL;
+    	list->head = newNode;
+    	list->tail = newNode;
+    	list->index++;
+    	flag = TRUE;
+	}else if((list->index > 0)&&(newNode!=NULL)){
+		newNode->activity = act;
+		newNode->next = NULL;
+		list->tail->next = newNode;
+		list->tail = newNode;
+		list->index++;
+		flag = TRUE;
+	}
     return flag;
 }
 /*Update an activity
@@ -130,10 +150,10 @@ Activity to update -> act1, ID= 1001*/
 int updateActivity(struct List *list, struct Activity *actUp){
     printf("\n\n-----UPDATE ACTIVITY 1001-----\n");
     int flag = FALSE;
-    int position;
-    position = findId(list, actUp);
-    if(position != -1){
-       list -> activities[position] = actUp;
+    struct Node *nodeUp;
+    nodeUp = findId(list, actUp);
+    if(nodeUp != NULL){
+       nodeUp->activity = actUp;
        flag = TRUE;
     }
     return flag;
@@ -144,27 +164,41 @@ Delete act2, ID= 1002 */
 int deleteActivity(struct List *list, struct Activity *act){
     printf("\n\n-----DELETE ACTIVITY 1002-----\n");
     int flag = FALSE;
-    int i, position;
-    position = findId(list, act);
-    if(position != -1){
-      for(i=position; i<list->index; i++){
-        list->activities[i] = list->activities[i+1];
-        }
-        list -> index--;
+    struct Node *nodeDel;
+    struct Node *ind;
+    struct Node *last;
+    nodeDel = findId(list, act);
+    if(nodeDel != NULL){
+      	for(ind = list->head; ind!= NULL; ind=ind->next){ //bucle to search in the LinkedList
+      		if(ind->next==nodeDel){ //find the last node before the node to delete
+      			last = ind;
+      			break;
+			  }
+		  }
+		if(nodeDel == list->head){ //If the node to delete its the head of the LinkedList
+			list->head = nodeDel->next;
+			list->index--;
+		}else{
+			last->next = nodeDel->next;
+			list->index--;
+		}
+		free(nodeDel);
         flag = TRUE;
-    }
+	}
     return flag;
 }
 
-/*Searchs an activity's ID and return its position */
-int findId(struct List *list, struct Activity *act){
-    int pos = -1, i;
-    for(i=0;i<list->index;i++){
-        if(act->id == list->activities[i]->id){
-            pos = i;
+/*Searchs an activity's ID and return the node where its located */
+struct Node* findId(struct List *list, struct Activity *act){
+    struct Node *node;
+	struct Node *nodeFound = NULL;
+    for(node = list->head; node!= NULL; node=node->next){ //bucle to search in the LinkedList
+        if(act->id == node->activity->id){
+            nodeFound = node;
+            break;
         }
     }
-    return pos;
+    return nodeFound;
 }
 
 /*Returns the print format of a date */
@@ -215,17 +249,17 @@ char* toStringActivity(struct Activity *act){
 }
 
 /*Returns the print format of the list */
-char* toStringList(struct List *list, struct Activity *actDate[]){
+char* toStringList(struct List *list, struct Node *actDate[]){
     char output[10000];
     strcpy(output, "");
     int i;
     for(i=0; i<list->index; i++){
-        strcat(output, toStringActivity(actDate[i]));
+        strcat(output, toStringActivity(actDate[i]->activity));
         }
     return output;
 }
 
-//Fill the activitie's information
+/*Fill the activitie's information*/
 void fillData(struct List *list, struct Activity *act) {
 	char temp_index[3];
 	strcpy(temp_index, "");
@@ -239,16 +273,16 @@ void fillData(struct List *list, struct Activity *act) {
 }
 
 /*Sort the activities by start date in ascending order*/
-void dateSort(struct Activity *actDate[], struct List *list){
+void dateSort(struct Node *actDate[], struct List *list){
 	int i, j , days_x, days_y;
-	struct Activity *temp;
+	struct Node *temp;
 
 	for(i=0;i<(list->index)-1;i++){
 		for(j=0;j<(list->index)-1;j++){
 			days_x = 0;
 			days_y = 0;
-			days_x = getDays((actDate[j]));
-			days_y = getDays((actDate[j+1]));
+			days_x = getDays((actDate[j]->activity));
+			days_y = getDays((actDate[j+1]->activity));
 			if( days_x >= days_y ){
 				temp = (actDate[j]);
 				(actDate[j]) = (actDate[j+1]);
@@ -284,10 +318,24 @@ int getDays(struct Activity *act){
 	return days;
 
 }
-//Copy the list structure activity-pointer-array to a new activity-pointer-array
-void copyArray(struct List *list, struct Activity *actDate[]){
-	int i;
-	for(i=0; i<(list->index); i++){
-		actDate[i] =(list->activities[i]);
+/*Copy the linked list to a new Node-pointer-array*/
+void copyArray(struct List *list, struct Node *actDate[]){
+	int i = 0;
+	struct Node *node;
+	for(node = list->head; node!= NULL; node=node->next){
+		actDate[i] = node;
+		i++;
+	}
+
+}
+
+/* Free a node by sending its activity */
+void freeNodeByAct(struct List *list,struct Activity *act){
+	struct Node *node;
+	for(node = list->head; node!= NULL; node=node->next){
+		if(node->activity == act){
+			free(node);
+			break;
+		}
 	}
 }

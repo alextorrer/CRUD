@@ -26,7 +26,6 @@ struct Activity{
 struct List{
     int index;
     struct Node *head;
-	  struct Node *tail;
 };
 
 struct Node{
@@ -65,13 +64,12 @@ int main() {
 	//Fill data of to-update activity
     actUp->id = 1001; actUp->title = "Activity Updated"; actUp->description = "Some Description updated"; actUp->priority = "Low";
     actUp->start.day = 10; actUp->start.month = 6; actUp->start.year = 2019;
-	  actUp->finish.day = 11; actUp->finish.month = 6; actUp->finish.year =2019;
+	actUp->finish.day = 11; actUp->finish.month = 6; actUp->finish.year =2019;
 
     //Initialize variables
     struct List list;
     list.index = 0;
     list.head = NULL;
-    list.tail = NULL;
     struct Node *actDate[10]; //New Node-pointer-array for dateSort
 
     /*Calling functions */
@@ -96,8 +94,8 @@ int main() {
     fillData(&list, act10);
     createNode(&list, act10);
 
-	  copyArray(&list,actDate);
-    dateSort(actDate, &list);
+	copyArray(&list,actDate);
+	dateSort(actDate, &list);
     printf("%s", toStringList(&list, actDate));
 
     updateActivity(&list, actUp);
@@ -127,19 +125,23 @@ int main() {
 int createNode(struct List *list, struct Activity *act){
     int flag = FALSE;
     struct Node *newNode;
+    struct Node *node;
     newNode = (struct Node*)malloc(sizeof(struct Node));
     if((list->index == 0)&&(newNode!= NULL)){ //if the linked list its empty
     	newNode->activity = act;
     	newNode->next = NULL;
     	list->head = newNode;
-    	list->tail = newNode;
     	list->index++;
     	flag = TRUE;
 	}else if((list->index > 0)&&(newNode!=NULL)){
+		for(node = list->head; node!= NULL; node=node->next){
+			if(node->next == NULL){
+				node->next = newNode;
+				break;
+			}
+		}
 		newNode->activity = act;
 		newNode->next = NULL;
-		list->tail->next = newNode;
-		list->tail = newNode;
 		list->index++;
 		flag = TRUE;
 	}

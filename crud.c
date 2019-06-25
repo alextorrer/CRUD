@@ -26,7 +26,7 @@ struct Activity{
 struct List{
     int index;
     struct Node *head;
-	struct Node *tail;
+	  struct Node *tail;
 };
 
 struct Node{
@@ -65,7 +65,7 @@ int main() {
 	//Fill data of to-update activity
     actUp->id = 1001; actUp->title = "Activity Updated"; actUp->description = "Some Description updated"; actUp->priority = "Low";
     actUp->start.day = 10; actUp->start.month = 6; actUp->start.year = 2019;
-	actUp->finish.day = 9; actUp->finish.month = 6; actUp->finish.year =2019;
+	  actUp->finish.day = 11; actUp->finish.month = 6; actUp->finish.year =2019;
 
     //Initialize variables
     struct List list;
@@ -96,8 +96,8 @@ int main() {
     fillData(&list, act10);
     createNode(&list, act10);
 
-	copyArray(&list,actDate);
-	dateSort(actDate, &list);
+	  copyArray(&list,actDate);
+    dateSort(actDate, &list);
     printf("%s", toStringList(&list, actDate));
 
     updateActivity(&list, actUp);

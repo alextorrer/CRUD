@@ -1,6 +1,7 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
+#include<math.h>
 
 /*Constants */
 const int MAX = 100;
@@ -35,17 +36,23 @@ struct Node{
 
 /*Functions prototypes */
 int createNode(struct List *list, struct Activity *act);
+int createNodeSort(struct List *list, struct Activity *act);
 int updateActivity(struct List *list, struct Activity *actUp);
+int updateActivitySort(struct List *list, struct Activity *actUp);
 int deleteActivity(struct List *list, struct Activity *act);
 struct Node* findId(struct List *list, struct Activity *act);
 char* toStringDate(struct Date *date);
 char* toStringActivity(struct Activity *act);
-char* toStringList(struct List *list, struct Activity **auxDate);
+char* toStringList(struct List *list, struct Activity **aux);
 void fillData(struct List *list, struct Activity *act);
 struct Activity ** dateSort(struct List *list);
-int compareTo(struct Activity *date1, struct Activity *date2);
-int getDays(struct Activity *act);
-void copyArray(struct List *list, struct Activity **auxDate);
+int compareTo(struct Activity *act1, struct Activity *act2);
+struct Activity ** durationSort(struct List *list);
+int getDuration(struct Activity *act);
+int getDays(struct Date date);
+int getLeapYears(int year);
+int isLeapYear(int year);
+void copyArray(struct List *list, struct Activity **aux);
 void freeNodeByAct(struct List *list, struct Activity *act);
 
 int main() {
@@ -71,43 +78,43 @@ int main() {
     struct List list;
     list.index = 0;
     list.head = NULL;
-  	struct Activity **actDate; //New Node-pointer-array for dateSort
+	struct Activity **actDur; //New Node-pointer-array for dateSort
 
     /*Calling functions */
     fillData(&list, act1);
-    createNode(&list, act1);
+    createNodeSort(&list, act1);
     fillData(&list, act2);
-    createNode(&list, act2);
+    createNodeSort(&list, act2);
     fillData(&list, act3);
-    createNode(&list, act3);
+    createNodeSort(&list, act3);
     fillData(&list, act4);
-    createNode(&list, act4);
+    createNodeSort(&list, act4);
     fillData(&list, act5);
-    createNode(&list, act5);
+    createNodeSort(&list, act5);
     fillData(&list, act6);
-    createNode(&list, act6);
+    createNodeSort(&list, act6);
     fillData(&list, act7);
-    createNode(&list, act7);
+    createNodeSort(&list, act7);
     fillData(&list, act8);
-    createNode(&list, act8);
+    createNodeSort(&list, act8);
     fillData(&list, act9);
-    createNode(&list, act9);
+    createNodeSort(&list, act9);
     fillData(&list, act10);
-    createNode(&list, act10);
+    createNodeSort(&list, act10);
 
-	actDate = dateSort(&list);
-    printf("%s", toStringList(&list, actDate));
-    free(actDate);
+	actDur = durationSort(&list);
+    printf("%s", toStringList(&list, actDur));
+    free(actDur);
 
-    updateActivity(&list, actUp);
-    actDate = dateSort(&list);
-    printf("%s", toStringList(&list, actDate));
-    free(actDate);
+    updateActivitySort(&list, actUp);
+    actDur = durationSort(&list);
+    printf("%s", toStringList(&list, actDur));
+    free(actDur);
 
     deleteActivity(&list, act2);
-    actDate = dateSort(&list);
-    printf("%s", toStringList(&list, actDate));
-    free(actDate);
+    actDur = durationSort(&list);
+    printf("%s", toStringList(&list, actDur));
+    free(actDur);
 
 	freeNodeByAct(&list, act1);
 	freeNodeByAct(&list, act2);
@@ -148,6 +155,60 @@ int createNode(struct List *list, struct Activity *act){
 	}
     return flag;
 }
+
+/*Save the activity in the linked list sorting it by start date */
+int createNodeSort(struct List *list, struct Activity *act){
+	int flag = FALSE;
+    struct Node *newNode;
+    struct Node *node;
+    struct Node *temp;
+    int greater = 0, auxGreater = 0;
+    newNode = (struct Node*)malloc(sizeof(struct Node));
+    if((list->index == 0)&&(newNode!= NULL)){ //if the linked list its empty
+    	newNode->activity = act;
+    	newNode->next = NULL;
+    	list->head = newNode;
+    	list->index++;
+    	flag = TRUE;
+
+	}else if((list->index > 0)&&(newNode!=NULL)){
+		newNode->activity = act;
+		for(node = list->head; node!=NULL; node = node->next){
+			greater = compareTo(node->activity, act);
+
+			if(greater == 1){ //Add at the beginning
+				newNode->next = node;
+				list->index++;
+    			flag = TRUE;
+				break;
+			}
+
+			if((greater != 1)&&(node->next != NULL)){ //Add between 2 nodes
+				auxGreater = compareTo(node->next->activity, act);
+				if(auxGreater == 1){
+					temp = node->next;
+					node->next = newNode;
+					newNode->next = temp;
+					list->index++;
+    				flag = TRUE;
+					break;
+			}
+
+			if((greater != 1)&&(node->next == NULL)){ //Add at the end
+				node->next = newNode;
+				newNode->next = NULL;
+				list->index++;
+    			flag = TRUE;
+				break;
+			}
+
+			}
+
+		}
+	}
+	return flag;
+}
+
 /*Update an activity
 Activity to update -> act1, ID= 1001*/
 int updateActivity(struct List *list, struct Activity *actUp){
@@ -159,6 +220,18 @@ int updateActivity(struct List *list, struct Activity *actUp){
        nodeUp->activity = actUp;
        flag = TRUE;
     }
+    return flag;
+}
+
+/*Update an activity using the date sorting */
+int updateActivitySort(struct List *list, struct Activity *actUp){
+	printf("\n\n-----UPDATE ACTIVITY 1001 (Sorting)-----\n");
+    int flag = FALSE;
+    struct Node *nodeUp;
+    nodeUp = findId(list, actUp);
+    flag = deleteActivity(list,nodeUp->activity);
+    flag = createNodeSort(list, actUp);
+
     return flag;
 }
 
@@ -226,6 +299,7 @@ char* toStringDate(struct Date *date){
 char* toStringActivity(struct Activity *act){
     char output[1000];
     char tempId[10];
+    char tempDur[20];
     strcpy(output, "");
     strcpy(output, "\n");
     strcat(output, "Title: ");
@@ -247,17 +321,21 @@ char* toStringActivity(struct Activity *act){
     strcat(output, "Finish Date: ");
     strcat(output, toStringDate(&(act->finish)));
     strcat(output, "\n");
+    strcat(output, "Duration (days): ");
+    sprintf(tempDur, "%d", getDuration(act));
+    strcat(output, tempDur);
+	strcat(output, "\n");
 
     return output;
 }
 
 /*Returns the print format of the list */
-char* toStringList(struct List *list, struct Activity **auxDate){
+char* toStringList(struct List *list, struct Activity **aux){
     char output[10000];
     strcpy(output, "");
     int i;
     for(i=0; i<list->index; i++){
-        strcat(output, toStringActivity(*(auxDate + i)));
+        strcat(output, toStringActivity(*(aux + i)));
         }
     return output;
 }
@@ -275,7 +353,9 @@ void fillData(struct List *list, struct Activity *act) {
 	act->finish.day = 28 - (list->index); act->finish.month = 6; act->finish.year = 2019;
 }
 
-/*Sort the activities by start date in ascending order*/
+/*Sort the activities by start date in ascending order
+	@return pointer to activity-pointer-array
+*/
 struct Activity ** dateSort(struct List *list){
 	int i, j, greater = 0;
 	struct Activity *temp;
@@ -285,7 +365,7 @@ struct Activity ** dateSort(struct List *list){
 	copyArray(list,auxDate);
 
 	for(i=0;i<(list->index)-1;i++){
-		for(j=0;j<(list->index)-1;j++){
+		for(j=0;j<(list->index)-i-1;j++){
 			greater = compareTo((*(auxDate + j)), (*(auxDate + j + 1)));
 			if(greater == 1){
 				temp = *(auxDate + j);
@@ -302,21 +382,21 @@ struct Activity ** dateSort(struct List *list){
 	@return 2 if date2 is bigger
 	@return -1 if date1 == date2
  */
-int compareTo(struct Activity *date1, struct Activity *date2){
+int compareTo(struct Activity *act1, struct Activity *act2){
 	int flag = -1;
-	if(date1->start.year > date2->start.year){
+	if(act1->start.year > act2->start.year){
 		flag = 1;
-	}else if(date2->start.year > date1->start.year){
+	}else if(act2->start.year > act1->start.year){
 		flag = 2;
 	}else{
-		if(date1->start.month > date2->start.month){
+		if(act1->start.month > act2->start.month){
 			flag = 1;
-		}else if(date2->start.month > date1->start.month){
+		}else if(act2->start.month > act1->start.month){
 			flag = 2;
 		}else{
-			if(date1->start.day > date2->start.day){
+			if(act1->start.day > act2->start.day){
 				flag = 1;
-			}else if(date2->start.day > date1->start.day){
+			}else if(act2->start.day > act1->start.day){
 				flag = 2;
 			}
 		}
@@ -324,37 +404,113 @@ int compareTo(struct Activity *date1, struct Activity *date2){
 	return flag;
 }
 
-/* Get the number of days contained in the start date */
-int getDays(struct Activity *act){
-	int days;
-	if(((act->start.month)%2==0) && ((act->start.month) < 9)){ //if its February, April, June or August
-		days = (((act->start.year)-1) * (365)) + (((act->start.month)-1) * (31)) + (act->start.day);
+/* Sort the linked list by the activitie's duration */
+struct Activity ** durationSort(struct List *list){
+	struct Activity **auxDur;
+	int duration1 = 0, duration2 = 0, i, j;
+	struct Activity *temp;
+	auxDur = (struct Activity**)malloc(list->index * sizeof(struct Activity *));
+	copyArray(list,auxDur);
 
-	}else if(((act->start.month)%2==0) && ((act->start.month) > 9)){ //if its October or December
-		days = (((act->start.year)-1) * (365)) + (((act->start.month)-1) * (30)) + (act->start.day);
-
-	}else if(((act->start.month)%2!=0) && ((act->start.month) == 1)){ // if its January
-		days = (((act->start.year)-1) * (365)) + (act->start.day);
-
-	}else if(((act->start.month)%2!=0) && ((act->start.month) == 3)){ // if its March
-		days = (((act->start.year)-1) * (365)) + (((act->start.month)-1) * (28)) + (act->start.day);
-
-	}else if(((act->start.month)%2!=0) && ((act->start.month) < 8)){ //if its May or July
-		days = (((act->start.year)-1) * (365)) + (((act->start.month)-1) * (30)) + (act->start.day);
-
-	}else if(((act->start.month)%2!=0) && ((act->start.month) > 8)){ //if its September or November
-		days = (((act->start.year)-1) * (365)) + (((act->start.month)-1) * (31)) + (act->start.day);
+	for(i=0;i<(list->index)-1;i++){
+		for(j=0;j<(list->index)-i-1;j++){
+			duration1 = getDuration(*(auxDur + j));
+			duration2 = getDuration(*(auxDur + j + 1));
+			if(duration1 >= duration2){
+				temp = *(auxDur + j);
+				*(auxDur + j) = *(auxDur + j +1);
+				*(auxDur + j + 1) = temp;
+			}
+		}
 	}
-
-	return days;
-
+	return auxDur;
 }
+
+/*Get the duration of an activity */
+int getDuration(struct Activity *act){
+	int duration;
+	int startDays = 0, finishDays = 0;
+	startDays = getDays(act->start);
+	finishDays = getDays(act->finish);
+	duration = finishDays - startDays;
+	return duration;
+}
+
+/* Get the number of days contained in the start date */
+int getDays(struct Date date){
+	int days = getLeapYears(date.year); //The variable "days" initialize with the extra days, including the actual year if its a leap year
+	int actualLeapYear = isLeapYear(date.year);
+
+	switch(date.month){
+		case 1:
+			days = (((date.year)-1) * (365)) + (date.day) - actualLeapYear;
+			break;
+		case 2:
+			days = (((date.year)-1) * (365)) + 31 + (date.day) - actualLeapYear;
+			break;
+		case 3:
+			days = (((date.year)-1) * (365)) + 31 + 28 + (date.day);
+			break;
+		case 4:
+			days = (((date.year)-1) * (365)) + 31 + 28 + 31 + (date.day);
+			break;
+		case 5:
+			days = (((date.year)-1) * (365)) + 31 + 28 + 31 + 30 + (date.day);
+			break;
+		case 6:
+			days = (((date.year)-1) * (365)) + 31 + 28 + 31 + 30 + 31 + (date.day);
+			break;
+		case 7:
+			days = (((date.year)-1) * (365)) + 31 + 28 + 31 + 30 + 31 + 30 + (date.day);
+			break;
+		case 8:
+			days = (((date.year)-1) * (365)) + 31 + 28 + 31 + 30 + 31 + 30 + 31 + (date.day);
+			break;
+		case 9:
+			days = (((date.year)-1) * (365)) + 31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + (date.day);
+			break;
+		case 10:
+			days = (((date.year)-1) * (365)) + 31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + (date.day);
+			break;
+		case 11:
+			days = (((date.year)-1) * (365)) + 31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + (date.day);
+			break;
+		case 12:
+			days = (((date.year)-1) * (365)) + 31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + (date.day);
+			break;
+	}
+	return days;
+}
+
+/*Get the leap years (extra days) between year 0 and the activity start year */
+int getLeapYears(int year){
+	int leapYears = 0;
+	int dif = 0, i;
+
+	for(i=0;i<year;i=i+100){
+		if((i%100 == 0)&&(i%400 != 0)){
+			dif++;
+		}
+	}
+	leapYears = floor(year/4) - dif;
+	return leapYears;
+}
+
+/*Function to know if the activity start year is a leap year */
+int isLeapYear(int year){
+	int flag = FALSE;
+	if((year%4==0)&&((year%400 == 0)||(!(year%100 == 0)))){
+		flag = TRUE;
+	}
+	return flag;
+}
+
 /*Copy the linked list to a new Activity-pointer-array*/
-void copyArray(struct List *list, struct Activity **auxDate){
+void copyArray(struct List *list, struct Activity **aux){
 	int i = 0;
 	struct Node *node;
 	for(node = list->head; node!= NULL; node=node->next){
-		*(auxDate + i) = node->activity;
+		*(aux + i) = node->activity;
 		i++;
 	}
 

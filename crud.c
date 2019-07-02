@@ -1,3 +1,9 @@
+/*
+Title: CRUD
+Author: Alejandro Torre Reyes
+Date: 01/07/2019
+Functions/Variables named: cammelCase
+*/
 #include<stdlib.h>
 #include<stdio.h>
 #include<string.h>
@@ -63,7 +69,7 @@ int deleteActivity(struct List *list, struct Activity *act);
 struct Node* findId(struct List *list, struct Activity *act);
 char* toStringDate(struct Date *date);
 char* toStringActivity(struct Activity *act);
-char* toStringList(struct List *list, struct Activity **aux);
+char* toStringList(struct List *list);
 void fillData(struct List *list, struct Activity *act);
 struct Activity ** dateSort(struct List *list);
 int compareTo(struct Activity *act1, struct Activity *act2);
@@ -74,12 +80,22 @@ int getLeapYears(int year);
 int isLeapYear(int year);
 void copyArray(struct List *list, struct Activity **aux);
 void freeNodeByAct(struct List *list, struct Activity *act);
-struct Person* createList(struct List *list, struct Person *person, struct Person **personArr);
+struct Person* createList(struct List *list, struct Person *person);
 int updateList(struct Person *person, struct Activity *act);
 int deleteList(struct Person *person, struct Activity *act);
 void saveInArray(struct Person **array, struct Person *person);
-char * toStringPersonList(struct Person *person, struct Activity **aux);
+char * toStringPersonList(struct Person *person);
+struct Person ** copyDurationArray(struct Person **personArr);
+int getTotalDuration(struct Person *person);
+void sortDurationArray(struct Person **array);
+char* toStringDuration(struct Person **personArr);
+struct Person ** shortestActivity(struct Person **personArr);
+char* printPersonArray(struct Person **personArr);
+int sumDates(struct Date date1, struct Date date2);
 
+/**
+*@brief Main block
+*/
 int main() {
 
 	//Reserve memory with malloc
@@ -94,16 +110,31 @@ int main() {
 	struct Activity *act9 = (struct Activity*)malloc(sizeof(struct Activity));
 	struct Activity *act10 = (struct Activity*)malloc(sizeof(struct Activity));
 	struct Activity *actUp = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *actUp2 = (struct Activity*)malloc(sizeof(struct Activity));
+	struct Activity *actUp3 = (struct Activity*)malloc(sizeof(struct Activity));
 
 	//Fill data of to-update activity
     actUp->id = 1001; actUp->title = "Activity Updated"; actUp->description = "Some Description updated"; actUp->priority = "Low";
-    actUp->start.day = 10; actUp->start.month = 6; actUp->start.year = 2019;
-	actUp->finish.day = 11; actUp->finish.month = 6; actUp->finish.year =2019;
+    actUp->start.day = 15; actUp->start.month = 6; actUp->start.year = 2019;
+	actUp->finish.day = 21; actUp->finish.month = 6; actUp->finish.year =2019;
+	actUp2->id = 1001; actUp2->title = "Activity Updated"; actUp2->description = "Some Description updated"; actUp2->priority = "Low";
+    actUp2->start.day = 10; actUp2->start.month = 6; actUp2->start.year = 2019;
+	actUp2->finish.day = 14; actUp2->finish.month = 6; actUp2->finish.year =2019;
+	actUp3->id = 1001; actUp3->title = "Activity Updated"; actUp3->description = "Some Description updated"; actUp3->priority = "Low";
+    actUp3->start.day = 10; actUp3->start.month = 6; actUp3->start.year = 2019;
+	actUp3->finish.day = 11; actUp3->finish.month = 6; actUp3->finish.year =2019;
 
     //Initialize variables
-	struct Activity **actDur; //New Node-pointer-array for dateSort
 	struct Person **personArr;
 	personArr = (struct Person**)malloc(PEOPLENUM * sizeof(struct Person*));
+	struct Person **personArrCopy;
+	personArrCopy = (struct Person**)malloc(PEOPLENUM * sizeof(struct Person*));
+	struct Person **shortArray;
+	struct Date date1;
+	struct Date date2;
+	date1.day = 1; date1.month = 7; date1.year = 2019;
+	date2.day = 2; date2.month = 7; date2.year = 2019;
+
 
 	//Create people
 	struct Person *newPerson1;
@@ -125,83 +156,87 @@ int main() {
 
 	//Create people's lists
 	person1.name = "Alex";
-	person1.list = &list1;
 	fillData(&list1, act1);
-    createNodeSort(&list1, act1);
+    createNode(&list1, act1);
     fillData(&list1, act2);
-    createNodeSort(&list1, act2);
+    createNode(&list1, act2);
     fillData(&list1, act3);
-    createNodeSort(&list1, act3);
+    createNode(&list1, act3);
+    person1.list = &list1;
 
     person2.name = "Jimmy";
-	person2.list = &list2;
 	fillData(&list2, act4);
-    createNodeSort(&list2, act4);
+    createNode(&list2, act4);
     fillData(&list2, act5);
-    createNodeSort(&list2, act5);
+    createNode(&list2, act5);
     fillData(&list2, act6);
-    createNodeSort(&list2, act6);
+    createNode(&list2, act6);
+    person2.list = &list2;
 
     person3.name = "Amaury";
-	person3.list = &list3;
 	fillData(&list3, act7);
-    createNodeSort(&list3, act7);
+    createNode(&list3, act7);
     fillData(&list3, act8);
-    createNodeSort(&list3, act8);
+    createNode(&list3, act8);
     fillData(&list3, act9);
-    createNodeSort(&list3, act9);
+    createNode(&list3, act9);
     fillData(&list3, act10);
-    createNodeSort(&list3, act10);
+    createNode(&list3, act10);
+	person3.list = &list3;
 
     //Create
-    newPerson1 = createList(&list1, newPerson1, personArr);
-    actDur = dateSort(newPerson1->list);
-    printf("%s", toStringPersonList(newPerson1, actDur));
-    free(actDur);
+    newPerson1 = createList(&list1, &person1);
+    printf("%s", toStringPersonList(newPerson1));
 
-    newPerson2 = createList(&list2, newPerson2, personArr);
-    actDur = dateSort(newPerson2->list);
-    printf("%s", toStringPersonList(newPerson2, actDur));
-    free(actDur);
+    newPerson2 = createList(&list2, &person2);
+    printf("%s", toStringPersonList(newPerson2));
 
-    newPerson3 = createList(&list3, newPerson3, personArr);
-    actDur = dateSort(newPerson3->list);
-    printf("%s", toStringPersonList(newPerson3, actDur));
-    free(actDur);
-
+    newPerson3 = createList(&list3, &person3);
+    printf("%s", toStringPersonList(newPerson3));
 
     //Update
     updateList(newPerson1, actUp);
-    actDur = dateSort(newPerson1->list);
-    printf("%s", toStringPersonList(newPerson1, actDur));
-    free(actDur);
+    printf("%s", toStringPersonList(newPerson1));
 
-    updateList(newPerson2, actUp);
-    actDur = dateSort(newPerson2->list);
-    printf("%s", toStringPersonList(newPerson2, actDur));
-    free(actDur);
+    updateList(newPerson2, actUp2);
+    printf("%s", toStringPersonList(newPerson2));
 
-    updateList(newPerson3, actUp);
-    actDur = dateSort(newPerson3->list);
-    printf("%s", toStringPersonList(newPerson3, actDur));
-    free(actDur);
+    updateList(newPerson3, actUp3);
+    printf("%s", toStringPersonList(newPerson3));
 
 
     //Delete
     deleteList(newPerson1, act2);
-    actDur = dateSort(newPerson1->list);
-    printf("%s", toStringPersonList(newPerson1, actDur));
-    free(actDur);
+    printf("%s", toStringPersonList(newPerson1));
 
     deleteList(newPerson2, act5);
-    actDur = dateSort(newPerson2->list);
-    printf("%s", toStringPersonList(newPerson2, actDur));
-    free(actDur);
+    printf("%s", toStringPersonList(newPerson2));
 
     deleteList(newPerson3, act9);
-    actDur = dateSort(newPerson3->list);
-    printf("%s", toStringPersonList(newPerson3, actDur));
-    free(actDur);
+    printf("%s", toStringPersonList(newPerson3));
+
+
+    //Save in array
+    //saveInArray(personArr, newPerson1);
+    //saveInArray(personArr, newPerson2);
+    //saveInArray(personArr, newPerson3);
+    *(personArr + 0) = newPerson1;
+    *(personArr + 1) = newPerson2;
+    *(personArr + 2) = newPerson3;
+    printf("%s", toStringDuration(personArr));
+
+    //Sort by duration
+    personArrCopy = copyDurationArray(personArr);
+    sortDurationArray(personArrCopy);
+    printf("ORDERED\n");
+    printf("%s", toStringDuration(personArrCopy));
+
+    //Print the shortest (duration)
+    shortArray = shortestActivity(personArr);
+    printf("%s", printPersonArray(shortArray));
+
+    //Sum dates
+    printf("The sum of the dates is: %d days", sumDates(date1, date2));
 
     //Free
     free(act1);
@@ -215,9 +250,14 @@ int main() {
     free(act9);
     free(act10);
     free(actUp);
+    free(actUp2);
+    free(actUp3);
     free(newPerson1);
     free(newPerson2);
     free(newPerson3);
+    free(personArr);
+    free(personArrCopy);
+    free(shortArray);
 
 }
 
@@ -319,7 +359,7 @@ int createNodeSort(struct List *list, struct Activity *act){
 */
 //Activity to update -> act1, ID= 1001
 int updateActivity(struct List *list, struct Activity *actUp){
-    printf("\n\n-----UPDATE ACTIVITY 1001-----\n");
+    printf("\n\n-----UPDATE ACTIVITY-----\n");
     int flag = FALSE;
     struct Node *nodeUp;
     nodeUp = findId(list, actUp);
@@ -453,7 +493,7 @@ char* toStringActivity(struct Activity *act){
     strcat(output, "Duration (days): ");
     sprintf(tempDur, "%d", getDuration(act));
     strcat(output, tempDur);
-	strcat(output, "\n");
+	strcat(output, "\n\n");
 
     return output;
 }
@@ -461,16 +501,18 @@ char* toStringActivity(struct Activity *act){
 /**
 *@brief Returns the print format of the list
 *@param list A pointer to a list
-*@param aux A pointer to the first element of an activity-pointer array
 *@return A string with the entire list information
 */
-char* toStringList(struct List *list, struct Activity **aux){
+char* toStringList(struct List *list){
     char output[10000];
+    int i = 0;
     strcpy(output, "");
-    int i;
-    for(i=0; i<list->index; i++){
-        strcat(output, toStringActivity(*(aux + i)));
+    struct Node *node;
+    for(node=list->head; node!=NULL; node = node->next){
+        strcat(output, toStringActivity(node->activity));
         }
+        i++;
+
     return output;
 }
 
@@ -487,12 +529,13 @@ void fillData(struct List *list, struct Activity *act) {
 	act->title = "Activity X";
 	act->description = "Some Description";
 	act->priority = "High";
-	act->start.day = 30 - (list->index); act->start.month = 6; act->start.year = 2019;
-	act->finish.day = 28 - (list->index); act->finish.month = 6; act->finish.year = 2019;
+	act->start.day = 26 - (list->index); act->start.month = 6; act->start.year = 2019;
+	act->finish.day = 30 - (list->index); act->finish.month = 6; act->finish.year = 2019;
 }
 
 /**
 *@brief Sort the activities by start date in ascending order
+*@param list A pointer to a list
 *@return pointer to activity-pointer-array
 */
 struct Activity ** dateSort(struct List *list){
@@ -677,7 +720,6 @@ void copyArray(struct List *list, struct Activity **aux){
 		*(aux + i) = node->activity;
 		i++;
 	}
-
 }
 
 /**
@@ -699,16 +741,13 @@ void freeNodeByAct(struct List *list,struct Activity *act){
 @brief Creates a person and his activity list
 *@param list A pointer to a list
 *@param person A pointer to a person
-*@param personArr The first element in a person-pointer array
 *@return A pointer to a person
 */
-struct Person* createList(struct List *list, struct Person *person, struct Person **personArr){
+struct Person* createList(struct List *list, struct Person *person){
 	struct Person *newPerson;
 	newPerson = (struct Person *)malloc(sizeof(struct Person));
 	newPerson->name = person->name;
 	newPerson->list = list;
-
-	saveInArray(personArr, newPerson);
 
 	return newPerson;
 }
@@ -721,9 +760,14 @@ struct Person* createList(struct List *list, struct Person *person, struct Perso
 */
 int updateList(struct Person *person, struct Activity *act){
 	int flag = FALSE;
-	char *aux = "updated";
-	flag = updateActivitySort(person->list, act);
-	strcat(person->name, aux);
+	char aux[15];
+	strcpy(aux,"");
+	char auxName[50];
+	strcpy(auxName,"");
+	strcpy(aux," updated");
+	strcpy(auxName, person->name);
+	strcat(auxName, aux);
+	flag = updateActivity(person->list, act);
 
 	return flag;
 }
@@ -747,24 +791,186 @@ int deleteList(struct Person *person, struct Activity *act){
 */
 void saveInArray(struct Person **array, struct Person *person){
 	int i = 0;
-	while(*(array + i) != NULL){
+	while(*(array+i)!=NULL){
 		i++;
 	}
-	*(array + i) = person;
+	*(array+i) = person;
 }
 
 /**
 *@brief Put the person information on a string
 *@param person A pointer to a person
-*@param aux The first element in an activity-pointer array
 *@return A string with the person's information
 */
-char * toStringPersonList(struct Person *person, struct Activity **aux){
+char * toStringPersonList(struct Person *person){
 	char output[100000];
 	strcpy(output, "");
 	strcat(output, "NAME: ");
 	strcat(output, person->name);
 	strcat(output, "\n");
-	strcat(output, toStringList(person->list, aux));
+	strcat(output, toStringList(person->list));
 	return output;
+}
+
+/**
+*@brief Copies a struct person-pointer array to another
+*@param personArr A struct person-pointer array
+*@return The copy of the array
+*/
+struct Person ** copyDurationArray(struct Person **personArr){
+	struct Person **copiedArr = (struct Person**)malloc(PEOPLENUM * sizeof(struct Person*));
+	int i;
+	for(i=0;i<PEOPLENUM;i++){
+		*(copiedArr + i) = *(personArr + i);
+	}
+	return copiedArr;
+}
+
+/**
+*@brief Gets the total duration of a list
+*@param list A list
+*@return The total duration of the activities in the list
+*/
+int getTotalDuration(struct Person *person){
+	int totalDuration = 0;
+	int actDuration = 0;
+	struct Node *node;
+	for(node=person->list->head; node!=NULL; node=node->next){
+		actDuration = getDuration(node->activity);
+		totalDuration = totalDuration + actDuration;
+	}
+	return totalDuration;
+}
+
+/**
+*@brief Bubble sort the copied struct person-pointer array by duration
+*@param array The copy of a struct person-pointer array
+*/
+void sortDurationArray(struct Person **array){
+	int i,j;
+	struct Person *temp;
+	struct Person *element1;
+	struct Person *element2;
+	for(i=0;i<PEOPLENUM-1; i++){
+		for(j=0; j<PEOPLENUM-i-1; j++){
+			element1 = *(array + j);
+			element2 = *(array + j + 1);
+			if(getTotalDuration(element1) > getTotalDuration(element2)){
+				temp = *(array + j);
+				*(array + j) = *(array + j + 1);
+				*(array + j + 1) = temp;
+			}
+		}
+	}
+}
+
+/**
+*@brief Creates a string with the list duration information
+*@param personArr A struct person-pointer array
+*@return A string with the duration information
+*/
+char* toStringDuration(struct Person **personArr){
+	char output[10000];
+	strcpy(output, "");
+	char tempDur[3];
+	strcpy(tempDur, "");
+	int i;
+	int listDuration = 0;
+	struct Person *element;
+
+	for(i=0;i<PEOPLENUM;i++){
+		element = *(personArr + i);
+		listDuration = getTotalDuration(element);
+		sprintf(tempDur, "%d", listDuration);
+		strcat(output, "Name: ");
+		strcat(output, (element->name));
+		strcat(output, "\n" );
+		strcat(output, "Total Duration: ");
+		strcat(output, tempDur);
+		strcat(output, "\n");
+	}
+
+	return output;
+}
+
+/**
+*@brief Finds the activity with the less duration time
+*@param personArr A pointer to the first element of a person-pointer-array
+*@return An array of people with the less duration time activitie's
+*/
+struct Person ** shortestActivity(struct Person **personArr){
+	int i,j;
+	struct Node *node;
+	struct Person *actualPerson;
+	struct Activity *shortAct;
+	struct Person *aux;
+	struct Person **shortArray;
+	shortArray = (struct Person**)malloc(PEOPLENUM * sizeof(struct Person *));
+	aux = *(personArr+0);
+	shortAct = aux->list->head->activity; //The shortest activity begin with the first activity of the first person
+	*(shortArray+0) = *(personArr+0);
+
+	for(i=0;i<PEOPLENUM;i++){ //Searching the shortest activities and save it in an array
+		actualPerson = *(personArr + i);
+		j=0;
+		for(node= actualPerson->list->head->next; node!=NULL; node = node->next){
+			if(getDuration(node->activity) < getDuration(shortAct)){ //If the duration of the activity in the actual list in the actual person is SMALLER than the shortest Activity
+				*(shortArray+0) = actualPerson; //Save it in the first position
+				shortAct = node->activity;
+				while(j < PEOPLENUM-1){ //Make NULL everything after the first element (the shortest)
+					j++;
+					*(shortArray+j) = NULL;
+					break;
+				}
+
+			}else if(getDuration(node->activity) == getDuration(shortAct)){ //If the duration of the activity in the actual list in the actual person is EQUAL to the shortest Activity
+				for(j=0;j<PEOPLENUM;j++){
+					if(actualPerson == *(shortArray + j)){ //If the person its already in the array
+						break;
+					}else{
+						if(*(shortArray+j)==NULL){ //If the position its empty
+							*(shortArray+j) = actualPerson;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	return shortArray;
+}
+
+/**
+*@brief Generates the string of the shortest activity information
+*@param personArr A person pointer array
+*@return A string with the shortest activity information
+*/
+char* printPersonArray(struct Person **personArr){
+	int i;
+	char output[10000];
+	struct Person *actualPerson;
+	strcpy(output, "");
+	for(i=0;i<PEOPLENUM;i++){
+		actualPerson = *(personArr+i);
+    	if(actualPerson!=NULL){
+    		strcat(output, "Person with the shortest activity: ");
+    		strcat(output, actualPerson->name);
+    		strcat(output, "\n");
+		}else{
+			break;
+		}
+	}
+	return output;
+}
+
+/**
+*@brief Convert two dates in days and sum them
+*@param date1 A date struct
+*@param date2 A date struct
+*@return The sum of the two dates
+*/
+int sumDates(struct Date date1, struct Date date2){
+	int totalDays;
+	totalDays = getDays(date1) + getDays(date2);
+	return totalDays;
 }

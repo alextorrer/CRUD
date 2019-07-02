@@ -913,7 +913,7 @@ struct Person ** shortestActivity(struct Person **personArr){
 	for(i=0;i<PEOPLENUM;i++){ //Searching the shortest activities and save it in an array
 		actualPerson = *(personArr + i);
 		j=0;
-		for(node= actualPerson->list->head->next; node!=NULL; node = node->next){
+		for(node= actualPerson->list->head; node!=NULL; node = node->next){
 			if(getDuration(node->activity) < getDuration(shortAct)){ //If the duration of the activity in the actual list in the actual person is SMALLER than the shortest Activity
 				*(shortArray+0) = actualPerson; //Save it in the first position
 				shortAct = node->activity;
